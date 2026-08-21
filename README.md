@@ -1,32 +1,94 @@
-# React + TypeScript + Vite
+# KANSO — Write Without the Noise
 
-This template provides a minimal setup to get React working in Vite with HMR and some Oxlint rules.
+> *Kanso* is a Japanese word. It means **simplicity**. Remove what does not belong. Keep what matters.
 
-Currently, two official plugins are available:
+---
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+## What Is This?
 
-## React Compiler
+**Kanso** is a writing app built for one thing — helping you focus on your words.
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+No big menus. No pop-ups begging for your attention. No distractions hiding in the corners.
 
-## Expanding the Oxlint configuration
+Just you. A blank page. And a quiet place to think.
 
-If you are developing a production application, we recommend enabling type-aware lint rules by installing `oxlint-tsgolint` and editing `.oxlintrc.json`:
+---
 
-```json
-{
-  "$schema": "./node_modules/oxlint/configuration_schema.json",
-  "plugins": ["react", "typescript", "oxc"],
-  "options": {
-    "typeAware": true
-  },
-  "rules": {
-    "react/rules-of-hooks": "error",
-    "react/only-export-components": ["warn", { "allowConstantExport": true }]
-  }
-}
+## What It Looks Like
+
+Picture a single card sitting on a dark screen.
+
+That card is your writing space.
+
+On the right side, a panel slides open when you need it — your **Toolbox**. When you don't need it, it disappears. Out of sight. Out of mind.
+
+Three themes to match how you feel:
+
+- **Light** — soft gray, easy on the eyes, warm and calm
+- **Coffee** — warm brown tones, like writing by lamplight
+- **Dark** — deep black, late-night focus mode
+
+---
+
+## What It Does
+
+### Write
+Open it. Start typing. That's it.
+
+The writing area fades softly at the top and bottom — so the edges never feel sharp or cut off. Your words flow naturally into the space.
+
+### Spell Check
+Kanso checks your spelling as you write — in **English, French, and Spanish**.
+
+It detects which language you are writing in. Misspelled words get a small red line underneath. Click the word to see suggestions.
+
+No annoying pop-ups. No red zigzags breaking your focus every two seconds.
+
+### The Toolbox
+Slide open the panel on the right. Here you can:
+
+- Switch your **theme** — light, coffee, or dark
+- Change your **font** — from classic Georgia to modern Inter and more
+- Set **word limits**, **paragraph limits**, and **page limits** — so you know when to stop
+- Use the **Scratchpad** — a small text box for quick notes and ideas
+- **Save** your writing to a file, **open** an old file, or start a **New Document**
+- Transform your text — **ALL CAPS**, **all lowercase**, or **Title Case** — in one click
+
+### Focus Tools
+See your word count, paragraph count, and page count right at the top. When you go over your limit, Kanso lets you know.
+
+---
+
+## How to Run It
+
+You need **Node.js** installed on your computer.
+
+```bash
+# Install everything it needs
+npm install
+
+# Start it up
+npm run dev
 ```
 
-See the [Oxlint rules documentation](https://oxc.rs/docs/guide/usage/linter/rules) for the full list of rules and categories.
+Then open your browser and go to the address it gives you. Usually something like `http://localhost:5173`.
+
+---
+
+## The Philosophy
+
+Most writing apps try to do everything.
+
+Kanso does not.
+
+Kanso believes that **a quiet space makes better writing**. It believes that tools should stay out of the way until you need them. It believes the words are what matter — not the app around them.
+
+Write one sentence. Then another. Then another.
+
+That is all.
+
+---
+
+*Built with React, TypeScript, and Vite.*
+*Spell checking powered by nspell + Hunspell dictionaries.*
+*Language detection powered by franc.*
