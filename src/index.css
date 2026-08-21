@@ -1,0 +1,62 @@
+@import "tailwindcss";
+
+@layer base {
+  body {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+  }
+}
+
+/* Light mode — fix opacity-based labels that become too faint on light bg */
+[data-theme="light"] .opacity-70 { opacity: 1 !important; color: #2a2a2e; }
+[data-theme="light"] .opacity-60 { opacity: 1 !important; color: #3a3a3e; }
+[data-theme="light"] .opacity-50 { opacity: 1 !important; color: #4a4a4e; }
+[data-theme="light"] .opacity-40 { opacity: 1 !important; color: #5a5a5e; }
+[data-theme="light"] .opacity-30 { opacity: 1 !important; color: #8a8a8e; }
+[data-theme="light"] .placeholder\:text-zinc-500\/60::placeholder { color: rgba(80,80,90,0.6); }
+
+/* Light mode scrollbar — dark thumb to match card background */
+[data-theme="light"] ::-webkit-scrollbar-thumb {
+  background: rgba(17, 17, 19, 0.2);
+}
+[data-theme="light"] ::-webkit-scrollbar-thumb:hover {
+  background: rgba(17, 17, 19, 0.35);
+}
+
+/* Custom Minimalist Scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+  margin-right: 4px;
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 9999px;
+  border-left: 1px solid transparent;
+  border-right: 4px solid transparent;
+  background-clip: padding-box;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+/* Number input spinners — transparent bg, white arrows */
+input[type=number]::-webkit-inner-spin-button,
+input[type=number]::-webkit-outer-spin-button {
+  -webkit-appearance: auto;
+  opacity: 1;
+  background: transparent;
+  filter: invert(1);
+  cursor: pointer;
+}
+
+/* Light mode spinners — black arrows, no bg */
+[data-theme="light"] input[type=number]::-webkit-inner-spin-button,
+[data-theme="light"] input[type=number]::-webkit-outer-spin-button {
+  filter: none;
+  background: transparent;
+}
