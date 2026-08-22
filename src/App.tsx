@@ -259,7 +259,7 @@ export default function App() {
   const themeStyle = getThemeStyles();
 
   return (
-    <div data-theme={currentTheme} className={`h-screen w-screen flex flex-col ${themeStyle.bg} ${themeStyle.text} font-sans pt-4 px-4 pb-4 md:pt-6 md:px-8 md:pb-8 box-border transition-colors duration-500 overflow-hidden`} style={themeStyle.bgStyle}>
+    <div data-theme={currentTheme} className={`h-dvh w-full flex flex-col ${themeStyle.bg} ${themeStyle.text} font-sans pt-4 px-4 pb-4 md:pt-6 md:px-8 md:pb-8 box-border transition-colors duration-500 overflow-hidden`} style={themeStyle.bgStyle}>
       
 {/* Hidden during Focus Mode! */}
       {!isFocusMode && (
