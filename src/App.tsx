@@ -248,7 +248,7 @@ export default function App() {
   const getThemeStyles = () => {
     switch (currentTheme) {
       case 'light':
-        return { bg: 'bg-[#C8C8CD]', text: 'text-[#111113]', box: 'border-[#b4b4b9]/50 text-[#111113] shadow-sm', bgStyle: { backgroundColor: '#C8C8CD' }, boxStyle: { backgroundColor: '#e8e8ec', color: '#111113' }, widget: 'bg-black/8 border border-black/10', input: 'bg-[#f1f1f3] border border-black/15 text-[#111113]' };
+        return { bg: 'bg-[#C8C8CD]', text: 'text-[#111113]', box: 'border-[#b4b4b9]/50 text-[#111113] shadow-sm', bgStyle: { backgroundColor: '#C8C8CD' }, boxStyle: { backgroundColor: '#F2F3F4', color: '#111113' }, widget: 'bg-black/8 border border-black/10', input: 'bg-[#F2F3F4] border border-black/15 text-[#111113]' };
       case 'coffee':
         return { bg: 'bg-[#26211e]', text: 'text-[#f5ebd6]', box: 'bg-[#332c28]/90 border-[#4a3f3a]/50 text-[#f5ebd6] shadow-2xl', bgStyle: {}, boxStyle: {}, widget: 'bg-white/5 border border-[#5a4f48]/50', input: 'bg-black/30 border border-[#5a4f48]/40' };
       case 'dark':
@@ -380,7 +380,7 @@ export default function App() {
               <div className="flex flex-col gap-1.5 shrink-0">
                 <span className="text-[10px] font-semibold tracking-wider opacity-50 uppercase">Theme</span>
                 <div className={`flex items-center gap-1 ${themeStyle.widget} p-1 rounded-2xl`}>
-                  <button onClick={() => setCurrentTheme('light')} aria-label="Use light theme" aria-pressed={currentTheme === 'light'} title="Light theme" className={`flex-1 py-1.5 rounded-xl flex items-center justify-center transition-all cursor-pointer ${currentTheme === 'light' ? 'bg-[#ececef] text-black shadow-sm' : 'opacity-50 hover:opacity-100'}`}><Sun size={14} /></button>
+                  <button onClick={() => setCurrentTheme('light')} aria-label="Use light theme" aria-pressed={currentTheme === 'light'} title="Light theme" className={`flex-1 py-1.5 rounded-xl flex items-center justify-center transition-all cursor-pointer ${currentTheme === 'light' ? 'bg-[#F2F3F4] text-black shadow-sm' : 'opacity-50 hover:opacity-100'}`}><Sun size={14} /></button>
                   <button onClick={() => setCurrentTheme('coffee')} aria-label="Use coffee theme" aria-pressed={currentTheme === 'coffee'} title="Coffee theme" className={`flex-1 py-1.5 rounded-xl flex items-center justify-center transition-all cursor-pointer ${currentTheme === 'coffee' ? 'bg-[#4a3f3a] text-white shadow-sm' : 'opacity-50 hover:opacity-100'}`}><Coffee size={14} /></button>
                   <button onClick={() => setCurrentTheme('dark')} aria-label="Use dark theme" aria-pressed={currentTheme === 'dark'} title="Dark theme" className={`flex-1 py-1.5 rounded-xl flex items-center justify-center transition-all cursor-pointer ${currentTheme === 'dark' ? 'bg-white/20 text-white shadow-sm' : 'opacity-50 hover:opacity-100'}`}><Moon size={14} /></button>
                 </div>
