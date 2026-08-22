@@ -7,4 +7,15 @@ export default defineConfig({
   optimizeDeps: {
     include: ['nspell'],
   },
+  build: {
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          react: ['react', 'react-dom'],
+          lucide: ['lucide-react'],
+          zustand: ['zustand'],
+        },
+      },
+    },
+  },
 });

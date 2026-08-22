@@ -259,7 +259,7 @@ export default function App() {
   const themeStyle = getThemeStyles();
 
   return (
-    <div data-theme={currentTheme} className={`h-screen w-screen flex flex-col ${themeStyle.bg} ${themeStyle.text} font-sans pt-6 px-8 pb-8 box-border transition-colors duration-500 select-none overflow-hidden`} style={themeStyle.bgStyle}>
+    <div data-theme={currentTheme} className={`h-screen w-screen flex flex-col ${themeStyle.bg} ${themeStyle.text} font-sans pt-4 px-4 pb-4 md:pt-6 md:px-8 md:pb-8 box-border transition-colors duration-500 overflow-hidden`} style={themeStyle.bgStyle}>
       
 {/* Hidden during Focus Mode! */}
       {!isFocusMode && (
@@ -303,7 +303,7 @@ export default function App() {
       <div className="flex-1 flex gap-4 min-h-0 relative overflow-hidden">
         
 {/* Writing Canvas & Minimap Container */}
-        <main className={`flex-1 flex flex-row ${themeStyle.box} border backdrop-blur-xl rounded-4xl pt-8 pb-8 pl-8 pr-2 transition-all duration-300 relative min-h-0 overflow-hidden gap-4`} style={themeStyle.boxStyle}>
+        <main className={`flex-1 flex flex-row ${themeStyle.box} border backdrop-blur-xl rounded-2xl md:rounded-4xl pt-6 pb-6 pl-5 pr-2 md:pt-8 md:pb-8 md:pl-8 transition-all duration-300 relative min-h-0 overflow-hidden gap-4`} style={themeStyle.boxStyle}>
           
           <div className="relative flex-1 flex min-h-0 overflow-hidden" style={{ maskImage: `linear-gradient(to bottom, ${textareaScrolled ? 'transparent 0%, black 6%' : 'black 0%'}, ${textareaHasMore ? 'black 94%, transparent 100%' : 'black 100%'})`, WebkitMaskImage: `linear-gradient(to bottom, ${textareaScrolled ? 'transparent 0%, black 6%' : 'black 0%'}, ${textareaHasMore ? 'black 94%, transparent 100%' : 'black 100%'})` }}>
             <textarea
@@ -315,7 +315,7 @@ export default function App() {
               onScroll={(e) => { const el = e.target as HTMLTextAreaElement; setTextareaScrolled(el.scrollTop > 0); setTextareaHasMore(el.scrollTop + el.clientHeight < el.scrollHeight - 4); }}
               placeholder="Hey! This is your focused writing space — feel free to write anything here."
               spellCheck={toolbox.spellCheck}
-              className="relative w-full h-full bg-transparent border-none outline-none resize-none placeholder:text-zinc-500/60 overflow-y-auto py-0 pl-0 pr-8 caret-white selection:bg-emerald-500/30"
+              className="relative w-full h-full bg-transparent border-none outline-none resize-none placeholder:text-zinc-500/60 overflow-y-auto py-0 pl-0 pr-4 md:pr-8 selection:bg-emerald-500/30"
               style={{ fontSize: `${fontSize}px`, lineHeight: 1.7, letterSpacing: 0, wordSpacing: '0.08em', caretColor: 'auto', fontFamily }}
             />
           </div>
@@ -324,7 +324,7 @@ export default function App() {
 
 {/* Modular Toolbox Sidebar (Hidden during Focus Mode!) */}
         {!isFocusMode && (
-          <aside data-toolbox className={`${isPreferencesOpen ? 'absolute inset-y-0 right-0 z-40 w-full opacity-100 md:static md:w-84' : 'absolute inset-y-0 right-0 z-40 w-0 overflow-hidden opacity-0 md:static'} transition-all duration-500 ease-in-out ${themeStyle.box} border backdrop-blur-xl rounded-4xl shadow-2xl shrink-0 min-h-0 overflow-hidden flex flex-col`} style={themeStyle.boxStyle}><div onScroll={(e) => { const el = e.target as HTMLDivElement; setToolboxScrolled(el.scrollTop > 0); setToolboxHasMore(el.scrollTop + el.clientHeight < el.scrollHeight - 4); }} className="flex flex-col gap-4 flex-1 overflow-y-auto pl-5 pt-5 pb-5 pr-3" style={{ maskImage: `linear-gradient(to bottom, ${toolboxScrolled ? 'transparent 0%, black 8%' : 'black 0%'}, ${toolboxHasMore ? 'black 92%, transparent 100%' : 'black 100%'})`, WebkitMaskImage: `linear-gradient(to bottom, ${toolboxScrolled ? 'transparent 0%, black 8%' : 'black 0%'}, ${toolboxHasMore ? 'black 92%, transparent 100%' : 'black 100%'})` }}>
+          <aside data-toolbox className={`${isPreferencesOpen ? 'absolute inset-y-0 right-0 z-40 w-full opacity-100 md:static md:w-84' : 'absolute inset-y-0 right-0 z-40 w-0 overflow-hidden opacity-0 md:static'} transition-all duration-500 ease-in-out ${themeStyle.box} border backdrop-blur-xl rounded-2xl md:rounded-4xl shadow-2xl shrink-0 min-h-0 overflow-hidden flex flex-col`} style={themeStyle.boxStyle}><div onScroll={(e) => { const el = e.target as HTMLDivElement; setToolboxScrolled(el.scrollTop > 0); setToolboxHasMore(el.scrollTop + el.clientHeight < el.scrollHeight - 4); }} className="flex flex-col gap-4 flex-1 overflow-y-auto pl-5 pt-5 pb-5 pr-3" style={{ maskImage: `linear-gradient(to bottom, ${toolboxScrolled ? 'transparent 0%, black 8%' : 'black 0%'}, ${toolboxHasMore ? 'black 92%, transparent 100%' : 'black 100%'})`, WebkitMaskImage: `linear-gradient(to bottom, ${toolboxScrolled ? 'transparent 0%, black 8%' : 'black 0%'}, ${toolboxHasMore ? 'black 92%, transparent 100%' : 'black 100%'})` }}>
             
             <div className="flex items-center justify-between border-b border-white/10 pb-3 shrink-0">
               <div className="flex items-center gap-2">
