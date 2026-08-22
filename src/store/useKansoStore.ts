@@ -16,19 +16,30 @@ interface ToolboxVisibility {
       pageLimit: boolean;
       files: boolean;
       textTools: boolean;
-      scratchpad: boolean;
       metricsModal: boolean;
       spellCheck: boolean;
       }
+
+export interface KansoPreferences {
+      isPreferencesOpen: boolean;
+      currentTheme: 'light' | 'coffee' | 'dark';
+      fontFamily: string;
+      wordLimit: number;
+      paragraphLimit: number;
+      pageLimit: number;
+      fontSize: number;
+}
 
 interface KansoState {
       notes: Note[];
       activeNoteId: string | null;
       toolbox: ToolboxVisibility;
+      preferences: KansoPreferences;
       addNote: (title: string, content: string) => void;
       updateNote: (id: string, content: string) => void;
       setActiveNote: (id: string | null) => void;
       toggleToolboxItem: (key: keyof ToolboxVisibility) => void;
+      setPreference: <Key extends keyof KansoPreferences>(key: Key, value: KansoPreferences[Key]) => void;
 }
 
 export const useKansoStore = create<KansoState>()(
@@ -44,14 +55,26 @@ export const useKansoStore = create<KansoState>()(
                   pageLimit: true,
                   files: true,
                   textTools: true,
-                  scratchpad: true,
                   metricsModal: true,
                   spellCheck: true
             },
+            preferences: {
+                  isPreferencesOpen: true,
+                  currentTheme: 'dark',
+                  fontFamily: 'Georgia, serif',
+                  wordLimit: 500,
+                  paragraphLimit: 10,
+                  pageLimit: 1,
+                  fontSize: 18,
+            },
             addNote: (title, content) =>
-                  set((state) => ({
-                        notes: [{ id: Date.now().toString(), title, content,        updatedAt: Date.now() }, ...state.notes],
-                  })),
+                  set((state) => {
+                        const id = Date.now().toString();
+                        return {
+                              notes: [{ id, title, content, updatedAt: Date.now() }, ...state.notes],
+                              activeNoteId: id,
+                        };
+                  }),
             updateNote: (id, content) =>
                   set((state) => ({
                   notes: state.notes.map((note) => (note.id === id ? { ...note, content, updatedAt: Date.now() } : note)),
@@ -60,6 +83,10 @@ export const useKansoStore = create<KansoState>()(
             toggleToolboxItem: (key) =>
                   set((state) => ({
                   toolbox: { ...state.toolbox, [key]: !state.toolbox[key] },
+                  })),
+            setPreference: (key, value) =>
+                  set((state) => ({
+                  preferences: { ...state.preferences, [key]: value },
                   })),
             }),
             {
@@ -70,6 +97,10 @@ export const useKansoStore = create<KansoState>()(
                         toolbox: {
                               ...(current as KansoState).toolbox,
                               ...((persisted as Partial<KansoState>).toolbox ?? {}),
+                        },
+                        preferences: {
+                              ...(current as KansoState).preferences,
+                              ...((persisted as Partial<KansoState>).preferences ?? {}),
                         },
                   }),
             }

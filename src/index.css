@@ -6,6 +6,22 @@
     -moz-osx-font-smoothing: grayscale;
     text-rendering: optimizeLegibility;
   }
+
+  :where(button, input, select, textarea, [role="button"], [tabindex]):focus-visible {
+    outline: 2px solid #34d399;
+    outline-offset: 2px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
 }
 
 /* Light mode — fix opacity-based labels that become too faint on light bg */
@@ -15,6 +31,15 @@
 [data-theme="light"] .opacity-40 { opacity: 1 !important; color: #5a5a5e; }
 [data-theme="light"] .opacity-30 { opacity: 1 !important; color: #8a8a8e; }
 [data-theme="light"] .placeholder\:text-zinc-500\/60::placeholder { color: rgba(80,80,90,0.6); }
+
+/* Keep toolbox controls and compact labels consistently readable. */
+[data-toolbox] :where(button, input, textarea, label, span) {
+  font-weight: 700 !important;
+}
+
+[data-toolbox] :where(.text-\[9px\], .text-\[10px\], .text-\[11px\]) {
+  font-size: 0.75rem !important;
+}
 
 /* Light mode scrollbar — dark thumb to match card background */
 [data-theme="light"] ::-webkit-scrollbar-thumb {

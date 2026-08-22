@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import type { RefObject } from 'react';
 import { Search, Replace, X, ArrowUp, ArrowDown, CaseSensitive, WholeWord, ArrowRight, CheckCheck, GripHorizontal, History, Undo2 } from 'lucide-react';
+import { useDialogFocus } from '../hooks/useDialogFocus';
 
 // Props for the FindReplaceModal component
 interface FindReplaceModalProps {
@@ -24,6 +25,7 @@ interface ReplaceHistoryItem {
 
 // Main Find & Replace Modal Component
 export function FindReplaceModal({ content, onUpdate, isOpen, onClose, onSearchChange, initialQuery, textareaRef }: FindReplaceModalProps) {
+  const dialogRef = useDialogFocus<HTMLDivElement>(isOpen);
   const [findText, setFindText] = useState('');
   const [replaceText, setReplaceText] = useState('');
   const [matchCase, setMatchCase] = useState(false);
@@ -48,6 +50,19 @@ export function FindReplaceModal({ content, onUpdate, isOpen, onClose, onSearchC
   const [isDragging, setIsDragging] = useState(false);
   const dragOffset = useRef<{ x: number; y: number }>({ x: 0, y: 0 });
   const findInputRef = useRef<HTMLInputElement>(null);
+
+  const handleMoveKeyDown = (event: React.KeyboardEvent) => {
+    const offsets: Record<string, { x: number; y: number }> = {
+      ArrowLeft: { x: -10, y: 0 },
+      ArrowRight: { x: 10, y: 0 },
+      ArrowUp: { x: 0, y: -10 },
+      ArrowDown: { x: 0, y: 10 },
+    };
+    const offset = offsets[event.key];
+    if (!offset) return;
+    event.preventDefault();
+    setPosition((current) => ({ x: current.x + offset.x, y: current.y + offset.y }));
+  };
 
   // Auto-fill initial query when opened
   useEffect(() => {
@@ -254,30 +269,40 @@ export function FindReplaceModal({ content, onUpdate, isOpen, onClose, onSearchC
       onKeyDown={handleModalKeyDown}
     >
       <div
+        ref={dialogRef}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="find-replace-title"
         style={{ left: `${position.x}px`, top: `${position.y}px` }}
-        className="absolute pointer-events-auto w-[460px] bg-[#1c1c1e]/95 backdrop-blur-xl border border-white/15 p-5 rounded-[2rem] shadow-2xl flex flex-col gap-4 text-white animate-fadeIn"
+        className="absolute pointer-events-auto w-[calc(100vw-2rem)] max-w-115 bg-[#1c1c1e]/95 backdrop-blur-xl border border-white/15 p-5 rounded-4x1 shadow-2xl flex flex-col gap-4 text-white animate-fadeIn"
       >
         
         {/* Draggable Header */}
         <div 
-          className="flex items-center justify-between border-b border-white/15 pb-3 cursor-grab active:cursor-grabbing"
+          role="button"
+          tabIndex={0}
+          aria-label="Move find and replace dialog with arrow keys"
+          className="flex items-center justify-between border-b border-white/15 pb-3 cursor-grab"
           onMouseDown={handleMouseDown}
+          onKeyDown={handleMoveKeyDown}
         >
           <div className="flex items-center gap-2">
             <GripHorizontal size={14} className="opacity-40" />
             <Search size={14} className="text-emerald-400" />
-            <span className="font-semibold text-xs tracking-wider uppercase opacity-90">Find & Quick Replace</span>
+            <span id="find-replace-title" className="font-semibold text-xs tracking-wider uppercase opacity-90">Find & Quick Replace</span>
           </div>
           <div className="flex items-center gap-2">
             <button 
               onClick={() => setShowHistory(!showHistory)}
+              aria-label="Toggle replacement history"
+              aria-pressed={showHistory}
               className={`p-1.5 rounded-lg transition text-xs flex items-center gap-1 cursor-pointer ${showHistory ? 'bg-emerald-500 text-black font-semibold' : 'bg-white/5 hover:bg-white/15 opacity-70'}`}
               title="Toggle Replace History"
             >
               <History size={14} />
               <span className="text-[10px] font-mono">{history.length}</span>
             </button>
-            <button onClick={onClose} className="p-1 rounded-full bg-white/5 hover:bg-white/15 transition cursor-pointer">
+            <button onClick={onClose} aria-label="Close find and replace" title="Close" className="p-1 rounded-full bg-white/5 hover:bg-white/15 transition cursor-pointer">
               <X size={14} />
             </button>
           </div>
@@ -294,9 +319,9 @@ export function FindReplaceModal({ content, onUpdate, isOpen, onClose, onSearchC
                 <div key={item.id} className="flex items-center justify-between bg-white/5 p-2 rounded-xl border border-white/5 hover:border-white/15 transition">
                   <div className="flex flex-col gap-0.5 overflow-hidden">
                     <div className="flex items-center gap-1.5 font-mono text-[11px]">
-                      <span className="text-red-400 truncate max-w-[100px]">"{item.find}"</span>
+                      <span className="text-red-400 truncate max-w-25">"{item.find}"</span>
                       <ArrowRight size={10} className="opacity-40 shrink-0" />
-                      <span className="text-emerald-400 truncate max-w-[100px]">"{item.replace}"</span>
+                      <span className="text-emerald-400 truncate max-w-25">"{item.replace}"</span>
                     </div>
                     <span className="text-[9px] opacity-40 font-mono">{item.timestamp}</span>
                   </div>
@@ -319,6 +344,7 @@ export function FindReplaceModal({ content, onUpdate, isOpen, onClose, onSearchC
             <input
               ref={findInputRef}
               type="text"
+              aria-label="Find text"
               placeholder="Find... (Enter/↓ next, Up/Shift+Enter prev)"
               value={findText}
               onChange={(e) => {
@@ -326,12 +352,14 @@ export function FindReplaceModal({ content, onUpdate, isOpen, onClose, onSearchC
                 setCurrentIndex(0);
               }}
               onKeyDown={handleFindKeyDown}
-              className="w-full bg-black/40 border border-white/10 rounded-xl pl-9 pr-32 py-2 text-xs outline-none focus:border-emerald-500 transition"
+              className="w-full bg-black/40 border border-white/10 rounded-xl pl-9 pr-32 py-2 text-xs outline-none transition"
             />
             
             <div className="absolute right-2 flex items-center gap-1">
               <button
                 onClick={() => setMatchCase(!matchCase)}
+                aria-label="Match case"
+                aria-pressed={matchCase}
                 className={`p-1 rounded-lg text-[10px] font-mono font-bold transition ${matchCase ? 'bg-emerald-500 text-black' : 'bg-white/5 opacity-50 hover:opacity-100'}`}
                 title="Match Case (Aa)"
               >
@@ -339,6 +367,8 @@ export function FindReplaceModal({ content, onUpdate, isOpen, onClose, onSearchC
               </button>
               <button
                 onClick={() => setMatchWholeWord(!matchWholeWord)}
+                aria-label="Match whole word"
+                aria-pressed={matchWholeWord}
                 className={`p-1 rounded-lg text-[10px] font-mono font-bold transition ${matchWholeWord ? 'bg-emerald-500 text-black' : 'bg-white/5 opacity-50 hover:opacity-100'}`}
                 title="Match Whole Word (ab)"
               >
@@ -349,6 +379,7 @@ export function FindReplaceModal({ content, onUpdate, isOpen, onClose, onSearchC
               </span>
               <button 
                 onClick={handlePrevMatch} 
+                aria-label="Previous match"
                 disabled={matchCount === 0}
                 className="p-1 rounded hover:bg-white/10 disabled:opacity-30 cursor-pointer"
                 title="Previous Match (Up / Shift+Enter)"
@@ -357,6 +388,7 @@ export function FindReplaceModal({ content, onUpdate, isOpen, onClose, onSearchC
               </button>
               <button 
                 onClick={handleNextMatch} 
+                aria-label="Next match"
                 disabled={matchCount === 0}
                 className="p-1 rounded hover:bg-white/10 disabled:opacity-30 cursor-pointer"
                 title="Next Match (Enter / Down)"
@@ -371,10 +403,11 @@ export function FindReplaceModal({ content, onUpdate, isOpen, onClose, onSearchC
             <span className="absolute left-3 top-2.5 opacity-40"><Replace size={14} /></span>
             <input
               type="text"
+              aria-label="Replacement text"
               placeholder="Replace with..."
               value={replaceText}
               onChange={(e) => setReplaceText(e.target.value)}
-              className="w-full bg-black/40 border border-white/10 rounded-xl pl-9 pr-3 py-2 text-xs outline-none focus:border-emerald-500 transition"
+              className="w-full bg-black/40 border border-white/10 rounded-xl pl-9 pr-3 py-2 text-xs outline-none transition"
             />
           </div>
         </div>

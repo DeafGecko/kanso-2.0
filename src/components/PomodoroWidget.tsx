@@ -29,7 +29,7 @@ useEffect(() => {
         <span className="text-xs font-semibold opacity-60 tracking-wider flex items-center gap-1">
           <Timer size={14} /> FOCUS TIMER
         </span>
-        <span className="text-xs font-mono font-bold text-emerald-400">{formatTime(timeLeft)}</span>
+        <span role="timer" aria-label={`${formatTime(timeLeft)} remaining`} className="text-xs font-mono font-bold text-emerald-400">{formatTime(timeLeft)}</span>
       </div>
       <div className="flex items-center gap-2 mt-1">
         <button 
@@ -40,6 +40,7 @@ useEffect(() => {
         </button>
         <button 
           onClick={() => { setIsRunning(false); setTimeLeft(25 * 60); }} 
+          aria-label="Reset focus timer"
           className="bg-zinc-800/50 hover:bg-zinc-800 text-zinc-400 p-2 rounded-xl text-xs transition"
           title="Reset"
         >

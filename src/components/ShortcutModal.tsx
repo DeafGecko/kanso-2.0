@@ -1,5 +1,6 @@
 import { useEffect, useState, useRef } from 'react';
 import { Command, X, Search, BarChart2, Sparkles, GripHorizontal } from 'lucide-react';
+import { useDialogFocus } from '../hooks/useDialogFocus';
 
 interface ShortcutModalProps {
   isOpen: boolean;
@@ -7,6 +8,7 @@ interface ShortcutModalProps {
 }
 
 export function ShortcutModal({ isOpen, onClose }: ShortcutModalProps) {
+  const dialogRef = useDialogFocus<HTMLDivElement>(isOpen);
   // Draggable & LocalStorage Position State (Defaults to Center)
   const [position, setPosition] = useState<{ x: number; y: number }>(() => {
     const saved = localStorage.getItem('kanso_shortcut_modal_pos');
@@ -40,6 +42,19 @@ export function ShortcutModal({ isOpen, onClose }: ShortcutModalProps) {
     };
   };
 
+  const handleMoveKeyDown = (event: React.KeyboardEvent) => {
+    const offsets: Record<string, { x: number; y: number }> = {
+      ArrowLeft: { x: -10, y: 0 },
+      ArrowRight: { x: 10, y: 0 },
+      ArrowUp: { x: 0, y: -10 },
+      ArrowDown: { x: 0, y: 10 },
+    };
+    const offset = offsets[event.key];
+    if (!offset) return;
+    event.preventDefault();
+    setPosition((current) => ({ x: current.x + offset.x, y: current.y + offset.y }));
+  };
+
   useEffect(() => {
     const handleMouseMove = (e: MouseEvent) => {
       if (!isDragging) return;
@@ -67,27 +82,35 @@ export function ShortcutModal({ isOpen, onClose }: ShortcutModalProps) {
   return (
     <div className="fixed inset-0 pointer-events-none z-50 select-none">
       <div
+        ref={dialogRef}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="shortcut-modal-title"
         style={{ left: `${position.x}px`, top: `${position.y}px` }}
-        className="absolute pointer-events-auto w-[500px] bg-[#1c1c1e]/95 backdrop-blur-xl border border-white/15 p-6 rounded-[2rem] shadow-2xl flex flex-col gap-5 text-white animate-fadeIn"
+        className="absolute pointer-events-auto w-[calc(100vw-2rem)] max-w-125 bg-[#1c1c1e]/95 backdrop-blur-xl border border-white/15 p-6 rounded-4x1 shadow-2xl flex flex-col gap-5 text-white animate-fadeIn"
       >
         
         {/* Draggable Header */}
         <div 
-          className="flex items-center justify-between border-b border-white/15 pb-3 cursor-grab active:cursor-grabbing"
+          role="button"
+          tabIndex={0}
+          aria-label="Move shortcut dialog with arrow keys"
+          className="flex items-center justify-between border-b border-white/15 pb-3 cursor-grab"
           onMouseDown={handleMouseDown}
+          onKeyDown={handleMoveKeyDown}
         >
           <div className="flex items-center gap-2">
             <GripHorizontal size={14} className="opacity-40" />
             <Command size={16} className="text-emerald-400" />
-            <span className="font-semibold text-xs tracking-wider uppercase opacity-90">Kanso Shortcut Cheat Sheet</span>
+            <span id="shortcut-modal-title" className="font-semibold text-xs tracking-wider uppercase opacity-90">Kanso Shortcut Cheat Sheet</span>
           </div>
-          <button onClick={onClose} className="p-1 rounded-full bg-white/5 hover:bg-white/15 transition cursor-pointer">
+          <button onClick={onClose} aria-label="Close shortcut cheat sheet" title="Close" className="p-1 rounded-full bg-white/5 hover:bg-white/15 transition cursor-pointer">
             <X size={14} />
           </button>
         </div>
 
         {/* Shortcut Categories */}
-        <div className="flex flex-col gap-4 max-h-[360px] overflow-y-auto pr-1 text-xs">
+        <div className="flex flex-col gap-4 max-h-90 overflow-y-auto pr-1 text-xs">
           
           {/* Section: Find & Replace */}
           <div className="flex flex-col gap-2">

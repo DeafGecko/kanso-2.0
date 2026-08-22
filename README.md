@@ -1,6 +1,6 @@
 # KANSO — Write Without the Noise
 
-> *Kanso* is a Japanese word. It means **simplicity**. Remove what does not belong. Keep what matters.
+> _Kanso_ is a Japanese word. It means **simplicity**. Remove what does not belong. Keep what matters.
 
 ---
 
@@ -33,29 +33,92 @@ Three themes to match how you feel:
 ## What It Does
 
 ### Write
+
 Open it. Start typing. That's it.
 
 The writing area fades softly at the top and bottom — so the edges never feel sharp or cut off. Your words flow naturally into the space.
 
 ### Spell Check
-Kanso checks your spelling as you write — in **English, French, and Spanish**.
 
-It detects which language you are writing in. Misspelled words get a small red line underneath. Click the word to see suggestions.
-
-No annoying pop-ups. No red zigzags breaking your focus every two seconds.
+Kanso uses nspell and Hunspell dictionaries for English, French, and Spanish. It detects the language of each paragraph, underlines misspelled words, and offers keyboard-accessible replacement suggestions.
 
 ### The Toolbox
+
 Slide open the panel on the right. Here you can:
 
 - Switch your **theme** — light, coffee, or dark
 - Change your **font** — from classic Georgia to modern Inter and more
 - Set **word limits**, **paragraph limits**, and **page limits** — so you know when to stop
-- Use the **Scratchpad** — a small text box for quick notes and ideas
+- Choose which Toolbox widgets are visible
 - **Save** your writing to a file, **open** an old file, or start a **New Document**
 - Transform your text — **ALL CAPS**, **all lowercase**, or **Title Case** — in one click
+- Keep quick notes in the adjustable **Scratchpad**
+
+Your theme, font, font size, limits, Toolbox visibility, and open or closed Toolbox state are saved in browser local storage and restored when you return.
 
 ### Focus Tools
-See your word count, paragraph count, and page count right at the top. When you go over your limit, Kanso lets you know.
+
+See your character, word, paragraph, and page counts in the warning bar. When a limit is reached, open the **Writing Limits Reached** dialog for a clear summary.
+
+### Accessibility
+
+Kanso includes keyboard-operable controls, visible focus states, accessible names and control states, focus-managed dialogs, screen-reader status announcements for file actions, reduced-motion support, responsive reflow, and appropriately sized interactive targets. These features are designed to support WCAG 2.2 AA use cases.
+
+---
+
+## Keyboard Shortcuts
+
+Use `Cmd` on macOS or `Ctrl` on Windows and Linux unless a shortcut says otherwise.
+
+### App
+
+| Shortcut                         | Action                                                           |
+| -------------------------------- | ---------------------------------------------------------------- |
+| `Cmd/Ctrl + F`                   | Open Find & Replace; selected editor text fills the search field |
+| `Cmd/Ctrl + Shift + F`           | Toggle Focus Mode                                                |
+| `Cmd/Ctrl + J`                   | Toggle document statistics and writing limits                    |
+| `Cmd/Ctrl + K` or `Alt + /`      | Toggle the Command Palette                                       |
+| `Cmd/Ctrl + =` or `Cmd/Ctrl + +` | Increase editor font size                                        |
+| `Cmd/Ctrl + -`                   | Decrease editor font size                                        |
+| `Escape`                         | Close the active dialog or floating panel                        |
+| `Tab` / `Shift + Tab`            | Move through controls; focus stays inside an open modal dialog   |
+
+### Find & Replace
+
+| Shortcut                      | Action                   |
+| ----------------------------- | ------------------------ |
+| `Enter` or `Arrow Down`       | Go to the next match     |
+| `Shift + Enter` or `Arrow Up` | Go to the previous match |
+| `Cmd/Ctrl + Enter`            | Replace all matches      |
+
+### Command Palette And Menus
+
+| Shortcut                  | Action                                                |
+| ------------------------- | ----------------------------------------------------- |
+| `Arrow Up` / `Arrow Down` | Move through command or font options                  |
+| `Home` / `End`            | Move to the first or last font option                 |
+| `Enter`                   | Run the selected command or activate a focused option |
+| `Escape`                  | Close the palette or font menu and restore focus      |
+
+### Editor Expansions
+
+Type a trigger and press `Tab`:
+
+| Trigger | Expansion                  |
+| ------- | -------------------------- |
+| `==`    | Horizontal divider         |
+| `date`  | Current local date         |
+| `h1`    | Level-one Markdown heading |
+| `todo`  | Markdown task item         |
+
+### Accessible Adjustments
+
+| Focused control            | Shortcut                  | Action                        |
+| -------------------------- | ------------------------- | ----------------------------- |
+| Spelling underline         | `Enter` or `Space`        | Open spelling suggestions     |
+| Scratchpad resize handle   | `Arrow Up` / `Arrow Down` | Resize by 10 pixels           |
+| Scratchpad resize handle   | `Home` / `End`            | Set minimum or maximum height |
+| Floating panel drag handle | Arrow keys                | Move the panel by 10 pixels   |
 
 ---
 
@@ -73,6 +136,13 @@ npm run dev
 
 Then open your browser and go to the address it gives you. Usually something like `http://localhost:5173`.
 
+Before publishing changes, run:
+
+```bash
+npm run lint
+npm run build
+```
+
 ---
 
 ## The Philosophy
@@ -89,6 +159,7 @@ That is all.
 
 ---
 
-*Built with React, TypeScript, and Vite.*
-*Spell checking powered by nspell + Hunspell dictionaries.*
-*Language detection powered by franc.*
+_Built with React, TypeScript, and Vite._
+_Spell checking powered by nspell + Hunspell dictionaries._
+_Language detection powered by franc._
+_Preferences and documents persisted locally with Zustand._

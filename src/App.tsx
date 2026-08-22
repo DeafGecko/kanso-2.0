@@ -1,18 +1,22 @@
 import { useState, useRef, useEffect } from 'react';
-import { useKansoStore } from './store/useKansoStore';
+import { useKansoStore, type KansoPreferences } from './store/useKansoStore';
 import { PanelRightOpen, PanelRightClose, Sun, Coffee, Moon, FileText, FolderOpen, Plus, Sliders } from 'lucide-react';
 import { TextToolsWidget } from './components/TextToolsWidget';
-import { ScratchpadWidget } from './components/ScratchpadWidget';
 import { MetricsModal } from './components/MetricsModal';
-import { SpellChecker } from './components/SpellChecker';
 import { FindReplaceModal } from './components/FindReplaceModal';
 import { ShortcutModal } from './components/ShortcutModal';
 import { CommandPalette } from './components/CommandPalette';
 
 // Main Application Component
 export default function App() {
-  const { notes, activeNoteId, updateNote, addNote, toolbox, toggleToolboxItem } = useKansoStore();
-  const [isPreferencesOpen, setIsPreferencesOpen] = useState(true);
+  const { notes, activeNoteId, updateNote, addNote, toolbox, toggleToolboxItem, preferences, setPreference } = useKansoStore();
+  const { isPreferencesOpen, currentTheme, fontFamily, wordLimit, paragraphLimit, pageLimit, fontSize } = preferences;
+  const setIsPreferencesOpen = (value: boolean) => setPreference('isPreferencesOpen', value);
+  const setCurrentTheme = (value: KansoPreferences['currentTheme']) => setPreference('currentTheme', value);
+  const setFontFamily = (value: string) => setPreference('fontFamily', value);
+  const setWordLimit = (value: number) => setPreference('wordLimit', value);
+  const setParagraphLimit = (value: number) => setPreference('paragraphLimit', value);
+  const setPageLimit = (value: number) => setPreference('pageLimit', value);
   const [isCustomizingToolbox, setIsCustomizingToolbox] = useState(false);
   const [isStatsModalOpen, setIsStatsModalOpen] = useState(false);
   const [isFindReplaceOpen, setIsFindReplaceOpen] = useState(false);
@@ -21,19 +25,13 @@ export default function App() {
   const [isCommandPaletteOpen, setIsCommandPaletteOpen] = useState(false);
   const [isFocusMode, setIsFocusMode] = useState(false);
 
-  // State for theme, font, and limits
-  const [currentTheme, setCurrentTheme] = useState<'light' | 'coffee' | 'dark'>('dark');
-  const [fontFamily, setFontFamily] = useState('Georgia, serif');
   const [isFontDropdownOpen, setIsFontDropdownOpen] = useState(false);
   const fontDropdownRef = useRef<HTMLDivElement>(null);
-  const [wordLimit, setWordLimit] = useState(500);
+  const fontTriggerRef = useRef<HTMLButtonElement>(null);
   const isWordLimitEnabled = true;
-  const [paragraphLimit, setParagraphLimit] = useState(10);
   const isParagraphLimitEnabled = true;
-  const [pageLimit, setPageLimit] = useState(1);
   const isPageLimitEnabled = true;
-  const [fontSize, setFontSize] = useState<number>(18);
-  const [spellCheckKey, setSpellCheckKey] = useState(0);
+  const [fileStatus, setFileStatus] = useState('');
 
   const fileInputRef = useRef<HTMLInputElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -51,6 +49,48 @@ export default function App() {
   const paragraphs = content.trim() ? content.split(/\n+/).length : 0;
   const pages = Math.max(1, Math.ceil(words / 250));
 
+  const focusEditor = () => requestAnimationFrame(() => textareaRef.current?.focus());
+
+  const handleSaveFile = () => {
+    const filename = `${activeNote?.title || 'kanso-document'}.txt`;
+    const downloadUrl = URL.createObjectURL(new Blob([content], { type: 'text/plain' }));
+    const element = document.createElement('a');
+    element.href = downloadUrl;
+    element.download = filename;
+    element.click();
+    URL.revokeObjectURL(downloadUrl);
+    setFileStatus(`${filename} saved.`);
+  };
+
+  const handleOpenFile = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = () => {
+      if (typeof reader.result !== 'string') {
+        setFileStatus(`Could not open ${file.name}.`);
+        return;
+      }
+
+      addNote(file.name.replace(/\.[^/.]+$/, ''), reader.result);
+      setFileStatus(`${file.name} opened.`);
+      event.target.value = '';
+      focusEditor();
+    };
+    reader.onerror = () => {
+      setFileStatus(`Could not open ${file.name}.`);
+      event.target.value = '';
+    };
+    reader.readAsText(file);
+  };
+
+  const handleNewDocument = () => {
+    addNote('New Document', '');
+    setFileStatus('New document created.');
+    focusEditor();
+  };
+
   // Check if any limits are exceeded
   const isWordLimitTracking = toolbox.wordLimit && isWordLimitEnabled;
   const isParagraphLimitTracking = toolbox.paragraphLimit && isParagraphLimitEnabled;
@@ -65,6 +105,14 @@ export default function App() {
     if (!el) return;
     setTextareaHasMore(el.scrollTop + el.clientHeight < el.scrollHeight - 4);
   }, [content]);
+
+  useEffect(() => {
+    if (!isFontDropdownOpen) return;
+    requestAnimationFrame(() => {
+      const selectedOption = fontDropdownRef.current?.querySelector<HTMLButtonElement>('[role="option"][aria-selected="true"]');
+      selectedOption?.focus();
+    });
+  }, [isFontDropdownOpen]);
 
   useEffect(() => {
     const previous = previousLimitWarningsRef.current;
@@ -147,8 +195,14 @@ export default function App() {
         setIsStatsModalOpen((prev) => !prev);
       }
       
+// Cmd + Shift + F for Focus Mode Chrome Collapse
+  if ((e.metaKey || e.ctrlKey) && e.shiftKey && e.key.toLowerCase() === 'f') {
+    e.preventDefault();
+    setIsFocusMode((prev) => !prev);
+  }
+
 // Cmd + F for Find & Replace Modal (with Selection Auto-Fill)
-      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'f') {
+  if ((e.metaKey || e.ctrlKey) && !e.shiftKey && e.key.toLowerCase() === 'f') {
         e.preventDefault();
         const textarea = textareaRef.current;
         if (textarea) {
@@ -158,12 +212,6 @@ export default function App() {
           }
         }
         setIsFindReplaceOpen(true);
-      }
-      
-// Cmd + Shift + F for Focus Mode Chrome Collapse
-      if ((e.metaKey || e.ctrlKey) && e.shiftKey && e.key.toLowerCase() === 'f') {
-        e.preventDefault();
-        setIsFocusMode((prev) => !prev);
       }
       
 // Cmd + K or Alt + / for Command Palette
@@ -181,13 +229,15 @@ export default function App() {
 // Cmd + = or Cmd + Plus for Zoom In
       if ((e.metaKey || e.ctrlKey) && (e.key === '=' || e.key === '+')) {
         e.preventDefault();
-        setFontSize((prev) => Math.min(prev + 2, 32));
+        const storedFontSize = useKansoStore.getState().preferences.fontSize;
+        useKansoStore.getState().setPreference('fontSize', Math.min(storedFontSize + 2, 32));
       }
 
 // Cmd + - for Zoom Out
       if ((e.metaKey || e.ctrlKey) && e.key === '-') {
         e.preventDefault();
-        setFontSize((prev) => Math.max(prev - 2, 12));
+        const storedFontSize = useKansoStore.getState().preferences.fontSize;
+        useKansoStore.getState().setPreference('fontSize', Math.max(storedFontSize - 2, 12));
       }
     };
     window.addEventListener('keydown', handleKeyDown);
@@ -198,7 +248,7 @@ export default function App() {
   const getThemeStyles = () => {
     switch (currentTheme) {
       case 'light':
-        return { bg: 'bg-[#D8D8DC]', text: 'text-[#111113]', box: 'border-[#c0c0c4]/40 text-[#111113] shadow-sm', bgStyle: { backgroundColor: '#D8D8DC' }, boxStyle: { backgroundColor: '#e8e8ec', color: '#111113' }, widget: 'bg-black/8 border border-black/10', input: 'bg-white border border-black/15 text-[#111113]' };
+        return { bg: 'bg-[#C8C8CD]', text: 'text-[#111113]', box: 'border-[#b4b4b9]/50 text-[#111113] shadow-sm', bgStyle: { backgroundColor: '#C8C8CD' }, boxStyle: { backgroundColor: '#e8e8ec', color: '#111113' }, widget: 'bg-black/8 border border-black/10', input: 'bg-[#f1f1f3] border border-black/15 text-[#111113]' };
       case 'coffee':
         return { bg: 'bg-[#26211e]', text: 'text-[#f5ebd6]', box: 'bg-[#332c28]/90 border-[#4a3f3a]/50 text-[#f5ebd6] shadow-2xl', bgStyle: {}, boxStyle: {}, widget: 'bg-white/5 border border-[#5a4f48]/50', input: 'bg-black/30 border border-[#5a4f48]/40' };
       case 'dark':
@@ -214,22 +264,22 @@ export default function App() {
 {/* Hidden during Focus Mode! */}
       {!isFocusMode && (
         <header className="flex items-center justify-between mb-4 px-2 shrink-0 animate-fadeIn">
-          <div className="flex items-center gap-3">
+          <div className="flex min-w-0 flex-wrap items-center gap-3">
             <h1 className="text-lg font-semibold tracking-widest font-serif opacity-90">KANSO</h1>
 
             {isOverAnyLimit && (
               <button
                 onClick={() => setIsStatsModalOpen(true)}
                 title="Open document statistics (Cmd + J)"
-                className="flex h-8 items-center gap-2 rounded-full border border-red-500/40 bg-red-500/10 px-4 text-[10px] font-sans shadow-sm backdrop-blur-md transition hover:bg-red-500/15 cursor-pointer"
+                className="flex min-h-9 max-w-full flex-wrap items-center gap-x-2 gap-y-1 rounded-full border border-red-500/40 bg-red-500/10 px-4 py-2 text-sm font-bold leading-tight font-sans shadow-sm backdrop-blur-md transition hover:bg-red-500/15 cursor-pointer"
               >
                 <span>{characters} Characters</span>
-                <span aria-hidden="true" className="opacity-30">|</span>
-                <span className={`transition-colors ${isWordOver ? 'font-semibold text-red-400' : ''}`}>{words} Words</span>
-                <span aria-hidden="true" className="opacity-30">|</span>
-                <span className={`transition-colors ${isParagraphOver ? 'font-semibold text-red-400' : ''}`}>{paragraphs} Paragraphs</span>
-                <span aria-hidden="true" className="opacity-30">|</span>
-                <span className={`transition-colors ${isPageOver ? 'font-semibold text-red-400' : ''}`}>{pages} Pages</span>
+                <span aria-hidden="true" className="mx-1 opacity-30">|</span>
+                <span className={`transition-colors ${isWordOver ? `font-semibold ${currentTheme === 'light' ? 'text-[#881337]' : 'text-red-400'}` : ''}`}>{words} Words</span>
+                <span aria-hidden="true" className="mx-1 opacity-30">|</span>
+                <span className={`transition-colors ${isParagraphOver ? `font-semibold ${currentTheme === 'light' ? 'text-[#881337]' : 'text-red-400'}` : ''}`}>{paragraphs} Paragraphs</span>
+                <span aria-hidden="true" className="mx-1 opacity-30">|</span>
+                <span className={`transition-colors ${isPageOver ? `font-semibold ${currentTheme === 'light' ? 'text-[#881337]' : 'text-red-400'}` : ''}`}>{pages} Pages</span>
               </button>
             )}
           </div>
@@ -256,27 +306,15 @@ export default function App() {
         <main className={`flex-1 flex flex-row ${themeStyle.box} border backdrop-blur-xl rounded-4xl pt-8 pb-8 pl-8 pr-2 transition-all duration-300 relative min-h-0 overflow-hidden gap-4`} style={themeStyle.boxStyle}>
           
           <div className="relative flex-1 flex min-h-0 overflow-hidden" style={{ maskImage: `linear-gradient(to bottom, ${textareaScrolled ? 'transparent 0%, black 6%' : 'black 0%'}, ${textareaHasMore ? 'black 94%, transparent 100%' : 'black 100%'})`, WebkitMaskImage: `linear-gradient(to bottom, ${textareaScrolled ? 'transparent 0%, black 6%' : 'black 0%'}, ${textareaHasMore ? 'black 94%, transparent 100%' : 'black 100%'})` }}>
-            {toolbox.spellCheck && (
-              <SpellChecker
-                content={content}
-                scrollRef={textareaRef}
-                fontFamily={fontFamily}
-                fontSize={fontSize}
-                onReplaceAll={(oldWord, newWord) => {
-                  const updated = content.split(oldWord).join(newWord);
-                  updateNote(activeNote.id, updated);
-                }}
-              />
-            )}
             <textarea
-              key={spellCheckKey}
               ref={textareaRef}
+              aria-label="Document content"
               value={content}
               onChange={(e) => updateNote(activeNote.id, e.target.value)}
               onKeyDown={handleKeyDownTextarea}
               onScroll={(e) => { const el = e.target as HTMLTextAreaElement; setTextareaScrolled(el.scrollTop > 0); setTextareaHasMore(el.scrollTop + el.clientHeight < el.scrollHeight - 4); }}
               placeholder="Hey! This is your focused writing space — feel free to write anything here."
-              spellCheck={false}
+              spellCheck={toolbox.spellCheck}
               className="relative w-full h-full bg-transparent border-none outline-none resize-none placeholder:text-zinc-500/60 overflow-y-auto py-0 pl-0 pr-8 caret-white selection:bg-emerald-500/30"
               style={{ fontSize: `${fontSize}px`, lineHeight: 1.7, letterSpacing: 0, wordSpacing: '0.08em', caretColor: 'auto', fontFamily }}
             />
@@ -286,20 +324,22 @@ export default function App() {
 
 {/* Modular Toolbox Sidebar (Hidden during Focus Mode!) */}
         {!isFocusMode && (
-          <aside className={`${isPreferencesOpen ? 'w-84' : 'w-0 overflow-hidden opacity-0'} transition-all duration-500 ease-in-out ${themeStyle.box} border backdrop-blur-xl rounded-[1.5rem] shadow-2xl shrink-0 min-h-0 overflow-hidden flex flex-col`} style={themeStyle.boxStyle}><div onScroll={(e) => { const el = e.target as HTMLDivElement; setToolboxScrolled(el.scrollTop > 0); setToolboxHasMore(el.scrollTop + el.clientHeight < el.scrollHeight - 4); }} className="flex flex-col gap-4 flex-1 overflow-y-auto pl-5 pt-5 pb-5 pr-3" style={{ maskImage: `linear-gradient(to bottom, ${toolboxScrolled ? 'transparent 0%, black 8%' : 'black 0%'}, ${toolboxHasMore ? 'black 92%, transparent 100%' : 'black 100%'})`, WebkitMaskImage: `linear-gradient(to bottom, ${toolboxScrolled ? 'transparent 0%, black 8%' : 'black 0%'}, ${toolboxHasMore ? 'black 92%, transparent 100%' : 'black 100%'})` }}>
+          <aside data-toolbox className={`${isPreferencesOpen ? 'absolute inset-y-0 right-0 z-40 w-full opacity-100 md:static md:w-84' : 'absolute inset-y-0 right-0 z-40 w-0 overflow-hidden opacity-0 md:static'} transition-all duration-500 ease-in-out ${themeStyle.box} border backdrop-blur-xl rounded-4xl shadow-2xl shrink-0 min-h-0 overflow-hidden flex flex-col`} style={themeStyle.boxStyle}><div onScroll={(e) => { const el = e.target as HTMLDivElement; setToolboxScrolled(el.scrollTop > 0); setToolboxHasMore(el.scrollTop + el.clientHeight < el.scrollHeight - 4); }} className="flex flex-col gap-4 flex-1 overflow-y-auto pl-5 pt-5 pb-5 pr-3" style={{ maskImage: `linear-gradient(to bottom, ${toolboxScrolled ? 'transparent 0%, black 8%' : 'black 0%'}, ${toolboxHasMore ? 'black 92%, transparent 100%' : 'black 100%'})`, WebkitMaskImage: `linear-gradient(to bottom, ${toolboxScrolled ? 'transparent 0%, black 8%' : 'black 0%'}, ${toolboxHasMore ? 'black 92%, transparent 100%' : 'black 100%'})` }}>
             
             <div className="flex items-center justify-between border-b border-white/10 pb-3 shrink-0">
               <div className="flex items-center gap-2">
                 <span className="font-medium tracking-wide text-xs uppercase opacity-70">Toolbox</span>
                 <button 
                   onClick={() => setIsCustomizingToolbox(!isCustomizingToolbox)} 
+                  aria-label="Customize widgets"
+                  aria-pressed={isCustomizingToolbox}
                   className={`p-1.5 rounded-full transition-all cursor-pointer ${isCustomizingToolbox ? 'bg-white text-black' : 'opacity-60 hover:opacity-100 bg-white/5'}`}
                   title="Customize Widgets"
                 >
                   <Sliders size={12} />
                 </button>
               </div>
-              <button onClick={() => setIsPreferencesOpen(false)} className="opacity-60 hover:opacity-100 transition cursor-pointer"><PanelRightClose size={16} /></button>
+              <button onClick={() => setIsPreferencesOpen(false)} aria-label="Close preferences" title="Close preferences" className="flex h-8 w-8 items-center justify-center rounded-full opacity-60 hover:bg-white/10 hover:opacity-100 transition cursor-pointer"><PanelRightClose size={16} /></button>
             </div>
 
 {/* Toolbox Widgets */}
@@ -320,7 +360,6 @@ export default function App() {
                         checked={isActive}
                         onChange={() => {
                           toggleToolboxItem(key as keyof typeof toolbox);
-                          if (key === 'spellCheck') setSpellCheckKey((currentKey) => currentKey + 1);
                         }}
                         className="peer sr-only"
                       />
@@ -341,9 +380,9 @@ export default function App() {
               <div className="flex flex-col gap-1.5 shrink-0">
                 <span className="text-[10px] font-semibold tracking-wider opacity-50 uppercase">Theme</span>
                 <div className={`flex items-center gap-1 ${themeStyle.widget} p-1 rounded-2xl`}>
-                  <button onClick={() => setCurrentTheme('light')} className={`flex-1 py-1.5 rounded-xl flex items-center justify-center transition-all cursor-pointer ${currentTheme === 'light' ? 'bg-white text-black shadow-sm' : 'opacity-50 hover:opacity-100'}`}><Sun size={14} /></button>
-                  <button onClick={() => setCurrentTheme('coffee')} className={`flex-1 py-1.5 rounded-xl flex items-center justify-center transition-all cursor-pointer ${currentTheme === 'coffee' ? 'bg-[#4a3f3a] text-white shadow-sm' : 'opacity-50 hover:opacity-100'}`}><Coffee size={14} /></button>
-                  <button onClick={() => setCurrentTheme('dark')} className={`flex-1 py-1.5 rounded-xl flex items-center justify-center transition-all cursor-pointer ${currentTheme === 'dark' ? 'bg-white/20 text-white shadow-sm' : 'opacity-50 hover:opacity-100'}`}><Moon size={14} /></button>
+                  <button onClick={() => setCurrentTheme('light')} aria-label="Use light theme" aria-pressed={currentTheme === 'light'} title="Light theme" className={`flex-1 py-1.5 rounded-xl flex items-center justify-center transition-all cursor-pointer ${currentTheme === 'light' ? 'bg-[#ececef] text-black shadow-sm' : 'opacity-50 hover:opacity-100'}`}><Sun size={14} /></button>
+                  <button onClick={() => setCurrentTheme('coffee')} aria-label="Use coffee theme" aria-pressed={currentTheme === 'coffee'} title="Coffee theme" className={`flex-1 py-1.5 rounded-xl flex items-center justify-center transition-all cursor-pointer ${currentTheme === 'coffee' ? 'bg-[#4a3f3a] text-white shadow-sm' : 'opacity-50 hover:opacity-100'}`}><Coffee size={14} /></button>
+                  <button onClick={() => setCurrentTheme('dark')} aria-label="Use dark theme" aria-pressed={currentTheme === 'dark'} title="Dark theme" className={`flex-1 py-1.5 rounded-xl flex items-center justify-center transition-all cursor-pointer ${currentTheme === 'dark' ? 'bg-white/20 text-white shadow-sm' : 'opacity-50 hover:opacity-100'}`}><Moon size={14} /></button>
                 </div>
               </div>
             )}
@@ -365,7 +404,17 @@ export default function App() {
                 <div className="flex flex-col gap-1.5 shrink-0" ref={fontDropdownRef}>
                   <span className="text-[10px] font-semibold tracking-wider opacity-50 uppercase">Font Family</span>
                   <button
+                    ref={fontTriggerRef}
                     onClick={() => setIsFontDropdownOpen(o => !o)}
+                    onKeyDown={(event) => {
+                      if (event.key === 'ArrowDown' || event.key === 'ArrowUp') {
+                        event.preventDefault();
+                        setIsFontDropdownOpen(true);
+                      }
+                    }}
+                    aria-haspopup="listbox"
+                    aria-expanded={isFontDropdownOpen}
+                    aria-controls="font-family-options"
                     className={`w-full flex items-center justify-between px-3 py-2 rounded-xl ${themeStyle.widget} hover:opacity-80 transition-colors cursor-pointer`}
                   >
                     <div className="text-left flex items-center justify-between flex-1 mr-2">
@@ -375,10 +424,33 @@ export default function App() {
                     <svg className={`w-3 h-3 opacity-40 transition-transform ${isFontDropdownOpen ? 'rotate-180' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" /></svg>
                   </button>
                   {isFontDropdownOpen && (
-                    <div className="flex flex-col gap-0.5 bg-zinc-900/95 border border-white/10 rounded-xl p-1 shadow-xl backdrop-blur-md">
+                    <div
+                      id="font-family-options"
+                      role="listbox"
+                      aria-label="Font family"
+                      onKeyDown={(event) => {
+                        const options = Array.from(event.currentTarget.querySelectorAll<HTMLButtonElement>('[role="option"]'));
+                        const currentIndex = options.indexOf(document.activeElement as HTMLButtonElement);
+                        if (event.key === 'Escape') {
+                          event.preventDefault();
+                          setIsFontDropdownOpen(false);
+                          fontTriggerRef.current?.focus();
+                        } else if (event.key === 'ArrowDown' || event.key === 'ArrowUp') {
+                          event.preventDefault();
+                          const direction = event.key === 'ArrowDown' ? 1 : -1;
+                          options[(currentIndex + direction + options.length) % options.length]?.focus();
+                        } else if (event.key === 'Home' || event.key === 'End') {
+                          event.preventDefault();
+                          options[event.key === 'Home' ? 0 : options.length - 1]?.focus();
+                        }
+                      }}
+                      className="flex flex-col gap-0.5 bg-zinc-900/95 border border-white/10 rounded-xl p-1 shadow-xl backdrop-blur-md"
+                    >
                       {fonts.map(({ value, label, sub }) => (
                         <button
                           key={value}
+                          role="option"
+                          aria-selected={fontFamily === value}
                           onClick={() => { setFontFamily(value); setIsFontDropdownOpen(false); }}
                           className={`w-full text-left px-2.5 py-1.5 rounded-lg transition-colors cursor-pointer flex items-center justify-between ${fontFamily === value ? 'bg-white/15 text-white' : 'hover:bg-white/8 text-white/70 hover:text-white'}`}
                         >
@@ -397,52 +469,38 @@ export default function App() {
 {/* Toolbox Widgets - word limit */}
             {toolbox.wordLimit && (
               <div className={`flex items-center justify-between gap-4 ${themeStyle.widget} px-3 py-2 rounded-2xl shrink-0`}>
-                <span className="text-[10px] font-semibold tracking-wider opacity-50 uppercase whitespace-nowrap">Word Limit</span>
-                <input type="number" value={wordLimit} onChange={(e) => setWordLimit(Number(e.target.value))} className={`${themeStyle.input} rounded-lg pl-2 pr-0 py-1 text-xs font-semibold text-right outline-none w-24 mr-1`} />
+                <label htmlFor="word-limit" className="text-[10px] font-semibold tracking-wider opacity-50 uppercase whitespace-nowrap">Word Limit</label>
+                <input id="word-limit" type="number" min="0" value={wordLimit} onChange={(e) => setWordLimit(Number(e.target.value))} className={`${themeStyle.input} rounded-lg pl-2 pr-0 py-1 text-xs font-semibold text-right outline-none w-24 mr-1`} />
               </div>
             )}
 
 {/* Toolbox Widgets - paragraph limit */}
             {toolbox.paragraphLimit && (
               <div className={`flex items-center justify-between gap-4 ${themeStyle.widget} px-3 py-2 rounded-2xl shrink-0`}>
-                <span className="text-[10px] font-semibold tracking-wider opacity-50 uppercase whitespace-nowrap">Paragraph Limit</span>
-                <input type="number" value={paragraphLimit} onChange={(e) => setParagraphLimit(Number(e.target.value))} className={`${themeStyle.input} rounded-lg pl-2 pr-0 py-1 text-xs font-semibold text-right outline-none w-24 mr-1`} />
+                <label htmlFor="paragraph-limit" className="text-[10px] font-semibold tracking-wider opacity-50 uppercase whitespace-nowrap">Paragraph Limit</label>
+                <input id="paragraph-limit" type="number" min="0" value={paragraphLimit} onChange={(e) => setParagraphLimit(Number(e.target.value))} className={`${themeStyle.input} rounded-lg pl-2 pr-0 py-1 text-xs font-semibold text-right outline-none w-24 mr-1`} />
               </div>
             )}
 
 {/* Toolbox Widgets - page limit */}
             {toolbox.pageLimit && (
               <div className={`flex items-center justify-between gap-4 ${themeStyle.widget} px-3 py-2 rounded-2xl shrink-0`}>
-                <span className="text-[10px] font-semibold tracking-wider opacity-50 uppercase whitespace-nowrap">Page Limit</span>
-                <input type="number" value={pageLimit} onChange={(e) => setPageLimit(Number(e.target.value))} className={`${themeStyle.input} rounded-lg pl-2 pr-0 py-1 text-xs font-semibold text-right outline-none w-24 mr-1`} />
+                <label htmlFor="page-limit" className="text-[10px] font-semibold tracking-wider opacity-50 uppercase whitespace-nowrap">Page Limit</label>
+                <input id="page-limit" type="number" min="0" value={pageLimit} onChange={(e) => setPageLimit(Number(e.target.value))} className={`${themeStyle.input} rounded-lg pl-2 pr-0 py-1 text-xs font-semibold text-right outline-none w-24 mr-1`} />
               </div>
             )}
 
-            {toolbox.scratchpad && <div className="shrink-0"><ScratchpadWidget widgetClass={themeStyle.widget} inputClass={themeStyle.input} /></div>}
-
             {toolbox.files && (
-              <div className="flex flex-col gap-2 mt-auto pt-3 border-t border-white/10 shrink-0">
-                <span className="text-[10px] font-semibold tracking-wider opacity-50 uppercase">Files</span>
-                <button onClick={() => {
-                  const element = document.createElement('a');
-                  element.href = URL.createObjectURL(new Blob([content], { type: 'text/plain' }));
-                  element.download = `${activeNote?.title || 'kanso-document'}.txt`;
-                  element.click();
-                }} className={`flex items-center gap-2.5 w-full ${themeStyle.widget} hover:opacity-80 transition p-2 rounded-xl text-xs cursor-pointer`}>
+              <div role="group" aria-labelledby="files-heading" className="flex flex-col gap-2 mt-auto pt-3 border-t border-white/10 shrink-0">
+                <span id="files-heading" className="text-[10px] font-semibold tracking-wider opacity-50 uppercase">Files</span>
+                <button type="button" onClick={handleSaveFile} className={`flex items-center gap-2.5 w-full ${themeStyle.widget} hover:opacity-80 transition p-2 rounded-xl text-xs cursor-pointer`}>
                   <FileText size={14} /> Save File
                 </button>
-                <input type="file" ref={fileInputRef} onChange={(e) => {
-                  const file = e.target.files?.[0];
-                  if (file) {
-                    const reader = new FileReader();
-                    reader.onload = (ev) => { if (ev.target?.result) addNote(file.name.replace(/\.[^/.]+$/, ""), ev.target.result as string); };
-                    reader.readAsText(file);
-                  }
-                }} accept=".txt,.md" className="hidden" />
-                <button onClick={() => fileInputRef.current?.click()} className={`flex items-center gap-2.5 w-full ${themeStyle.widget} hover:opacity-80 transition p-2 rounded-xl text-xs cursor-pointer`}>
+                <input type="file" ref={fileInputRef} onChange={handleOpenFile} accept=".txt,.md,text/plain,text/markdown" aria-label="Choose a text or Markdown file" className="hidden" />
+                <button type="button" onClick={() => fileInputRef.current?.click()} className={`flex items-center gap-2.5 w-full ${themeStyle.widget} hover:opacity-80 transition p-2 rounded-xl text-xs cursor-pointer`}>
                   <FolderOpen size={14} /> Open File
                 </button>
-                <button onClick={() => addNote('New Document', '')} className={`flex items-center gap-2.5 w-full ${themeStyle.widget} hover:opacity-80 transition p-2 rounded-xl text-xs cursor-pointer`}>
+                <button type="button" onClick={handleNewDocument} className={`flex items-center gap-2.5 w-full ${themeStyle.widget} hover:opacity-80 transition p-2 rounded-xl text-xs cursor-pointer`}>
                   <Plus size={14} /> New Document
                 </button>
               </div>
@@ -493,14 +551,10 @@ export default function App() {
           onTogglePreferences={() => setIsPreferencesOpen(!isPreferencesOpen)}
           onToggleToolboxDrawer={() => setIsCustomizingToolbox((prev) => !prev)}
           onSetTheme={(theme) => setCurrentTheme(theme)}
-          onSaveFile={() => {
-            const element = document.createElement('a');
-            element.href = URL.createObjectURL(new Blob([content], { type: 'text/plain' }));
-            element.download = `${activeNote?.title || 'kanso-document'}.txt`;
-            element.click();
-          }}
-          onNewDocument={() => addNote('New Document', '')}
+          onSaveFile={handleSaveFile}
+          onNewDocument={handleNewDocument}
         />
+        <div role="status" aria-live="polite" aria-atomic="true" className="sr-only">{fileStatus}</div>
       </div>
     </div>
   );

@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { Command, Search, X } from 'lucide-react';
+import { useDialogFocus } from '../hooks/useDialogFocus';
 
 interface CommandPaletteProps {
   isOpen: boolean;
@@ -26,6 +27,7 @@ export function CommandPalette({
   onSaveFile,
   onNewDocument,
 }: CommandPaletteProps) {
+  const dialogRef = useDialogFocus<HTMLDivElement>(isOpen);
   const [query, setQuery] = useState('');
   const [selectedIndex, setSelectedIndex] = useState(0);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -114,32 +116,41 @@ export function CommandPalette({
   return (
     <div className="fixed inset-0 pointer-events-none z-50 select-none">
       <div
+        ref={dialogRef}
+        role="dialog"
+        aria-modal="true"
+        aria-label="Command palette"
         style={{ left: `${position.x}px`, top: `${position.y}px` }}
-        className="absolute pointer-events-auto w-[500px] bg-[#1c1c1e]/95 backdrop-blur-xl border border-white/15 rounded-[2rem] shadow-2xl flex flex-col overflow-hidden text-white animate-fadeIn"
+        className="absolute pointer-events-auto w-[calc(100vw-2rem)] max-w-125 bg-[#1c1c1e]/95 backdrop-blur-xl border border-white/15 rounded-4xl shadow-2xl flex flex-col overflow-hidden text-white animate-fadeIn"
         onKeyDown={handleKeyDown}
       >
         
-        {/* Search Input Header */}
+{/* Search Input Header */}
         <div className="relative flex items-center border-b border-white/15 px-4 py-3">
           <Search size={16} className="text-emerald-400 mr-3 shrink-0" />
           <input
             ref={inputRef}
             type="text"
+            aria-label="Search commands"
+            role="combobox"
+            aria-expanded="true"
+            aria-controls="command-palette-list"
+            aria-activedescendant={filteredCommands[selectedIndex] ? `command-${filteredCommands[selectedIndex].id}` : undefined}
             placeholder="Type a command or search actions... (Esc to close)"
             value={query}
             onChange={(e) => {
               setQuery(e.target.value);
               setSelectedIndex(0);
             }}
-            className="w-full bg-transparent border-none outline-none text-xs text-white placeholder:text-zinc-500 font-medium"
+            className="w-full bg-transparent border-none outline-none text-xs text-white font-medium"
           />
-          <button onClick={onClose} className="p-1 rounded-full bg-white/5 hover:bg-white/15 transition cursor-pointer ml-2">
+          <button onClick={onClose} aria-label="Close command palette" title="Close" className="ml-2 flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-white/5 hover:bg-white/15 transition cursor-pointer">
             <X size={14} />
           </button>
         </div>
 
         {/* Command List */}
-        <div className="flex flex-col max-h-72 overflow-y-auto p-2 gap-1">
+        <div id="command-palette-list" role="listbox" aria-label="Commands" className="flex flex-col max-h-72 overflow-y-auto p-2 gap-1">
           {filteredCommands.length === 0 ? (
             <div className="text-zinc-500 text-center py-6 text-xs italic">No matching commands found.</div>
           ) : (
@@ -148,6 +159,10 @@ export function CommandPalette({
               return (
                 <div
                   key={cmd.id}
+                  id={`command-${cmd.id}`}
+                  role="option"
+                  aria-selected={isSelected}
+                  tabIndex={-1}
                   onClick={cmd.action}
                   onMouseEnter={() => setSelectedIndex(idx)}
                   className={`flex items-center justify-between px-3 py-2.5 rounded-xl text-xs cursor-pointer transition ${

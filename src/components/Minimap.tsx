@@ -155,7 +155,7 @@ export function Minimap({ content, pageLimit, isPageLimitEnabled, scrollRef, fin
   }, [draw]);
 
   // Click minimap to jump textarea to that position
-  const handleClick = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
+  const handleClick = useCallback((e: React.MouseEvent<HTMLButtonElement>) => {
     const el = scrollRef.current;
     if (!el) return;
     const rect = e.currentTarget.getBoundingClientRect();
@@ -169,15 +169,38 @@ export function Minimap({ content, pageLimit, isPageLimitEnabled, scrollRef, fin
     el.scrollTop = Math.max(0, targetFraction) * (el.scrollHeight - el.clientHeight);
   }, [scrollRef]);
 
+  const handleKeyDown = useCallback((event: React.KeyboardEvent<HTMLButtonElement>) => {
+    const textarea = scrollRef.current;
+    if (!textarea) return;
+
+    if (event.key === 'ArrowDown' || event.key === 'PageDown') {
+      event.preventDefault();
+      textarea.scrollBy({ top: textarea.clientHeight * 0.8 });
+    } else if (event.key === 'ArrowUp' || event.key === 'PageUp') {
+      event.preventDefault();
+      textarea.scrollBy({ top: -textarea.clientHeight * 0.8 });
+    } else if (event.key === 'Home') {
+      event.preventDefault();
+      textarea.scrollTop = 0;
+    } else if (event.key === 'End') {
+      event.preventDefault();
+      textarea.scrollTop = textarea.scrollHeight;
+    }
+  }, [scrollRef]);
+
   return (
-    <div
+    <button
+      type="button"
+      aria-label="Document minimap. Use arrow, Page Up, Page Down, Home, or End keys to navigate."
       className="w-16 self-stretch shrink-0 rounded-xl overflow-hidden opacity-30 hover:opacity-70 transition-opacity duration-300 cursor-pointer select-none"
       onClick={handleClick}
+      onKeyDown={handleKeyDown}
     >
       <canvas
+        aria-hidden="true"
         ref={canvasRef}
         style={{ display: 'block', width: '100%', height: '100%' }}
       />
-    </div>
+    </button>
   );
 }
