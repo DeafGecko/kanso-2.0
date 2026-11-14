@@ -376,7 +376,7 @@ export default function App() {
 {/* Toolbox Widgets - themes */}
             {toolbox.theme && (
               <div className="flex flex-col gap-1.5 shrink-0">
-                <span className="text-[10px] font-semibold tracking-wider opacity-50 uppercase">Theme</span>
+                <span className="text-[10px] font-semibold tracking-wider opacity-70 uppercase">Theme</span>
                 <div className={`flex items-center gap-1 ${themeStyle.widget} p-1 rounded-2xl`}>
                   <button onClick={() => setCurrentTheme('light')} aria-label="Use light theme" aria-pressed={currentTheme === 'light'} title="Light theme" className={`flex-1 py-1.5 rounded-xl flex items-center justify-center transition-all cursor-pointer ${currentTheme === 'light' ? 'bg-[#F2F3F4] text-black shadow-sm' : 'opacity-50 hover:opacity-100'}`}><Sun size={14} /></button>
                   <button onClick={() => setCurrentTheme('coffee')} aria-label="Use coffee theme" aria-pressed={currentTheme === 'coffee'} title="Coffee theme" className={`flex-1 py-1.5 rounded-xl flex items-center justify-center transition-all cursor-pointer ${currentTheme === 'coffee' ? 'bg-[#4a3f3a] text-white shadow-sm' : 'opacity-50 hover:opacity-100'}`}><Coffee size={14} /></button>
@@ -400,7 +400,7 @@ export default function App() {
               const active = fonts.find(f => f.value === fontFamily);
               return (
                 <div className="flex flex-col gap-1.5 shrink-0" ref={fontDropdownRef}>
-                  <span className="text-[10px] font-semibold tracking-wider opacity-50 uppercase">Font Family</span>
+                  <span className="text-[10px] font-semibold tracking-wider opacity-70 uppercase">Font Family</span>
                   <button
                     ref={fontTriggerRef}
                     onClick={() => setIsFontDropdownOpen(o => !o)}
@@ -417,7 +417,7 @@ export default function App() {
                   >
                     <div className="text-left flex items-center justify-between flex-1 mr-2">
                       <span style={{ fontFamily }} className={`text-sm leading-tight ${currentTheme === 'light' ? 'text-[#111113]' : 'text-white'}`}>{active?.label}</span>
-                      <span className="text-[9px] opacity-40 tracking-wider uppercase font-sans">{active?.sub}</span>
+                      <span className="text-[9px] opacity-70 tracking-wider uppercase font-sans">{active?.sub}</span>
                     </div>
                     <svg className={`w-3 h-3 opacity-40 transition-transform ${isFontDropdownOpen ? 'rotate-180' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" /></svg>
                   </button>
@@ -453,7 +453,7 @@ export default function App() {
                           className={`w-full text-left px-2.5 py-1.5 rounded-lg transition-colors cursor-pointer flex items-center justify-between ${fontFamily === value ? 'bg-white/15 text-white' : 'hover:bg-white/8 text-white/70 hover:text-white'}`}
                         >
                           <span style={{ fontFamily: value }} className="text-sm leading-tight">{label}</span>
-                          <span className="text-[9px] opacity-40 tracking-wider uppercase font-sans">{sub}</span>
+                          <span className="text-[9px] opacity-70 tracking-wider uppercase font-sans">{sub}</span>
                         </button>
                       ))}
                     </div>
@@ -467,7 +467,7 @@ export default function App() {
 {/* Toolbox Widgets - word limit */}
             {toolbox.wordLimit && (
               <div className={`flex items-center justify-between gap-4 ${themeStyle.widget} px-3 py-2 rounded-2xl shrink-0`}>
-                <label htmlFor="word-limit" className="text-[10px] font-semibold tracking-wider opacity-50 uppercase whitespace-nowrap">Word Limit</label>
+                <label htmlFor="word-limit" className="text-[10px] font-semibold tracking-wider opacity-70 uppercase whitespace-nowrap">Word Limit</label>
                 <input id="word-limit" type="number" min="0" value={wordLimit} onChange={(e) => setWordLimit(Number(e.target.value))} className={`${themeStyle.input} rounded-lg pl-2 pr-0 py-1 text-xs font-semibold text-right outline-none w-24 mr-1`} />
               </div>
             )}
@@ -475,7 +475,7 @@ export default function App() {
 {/* Toolbox Widgets - paragraph limit */}
             {toolbox.paragraphLimit && (
               <div className={`flex items-center justify-between gap-4 ${themeStyle.widget} px-3 py-2 rounded-2xl shrink-0`}>
-                <label htmlFor="paragraph-limit" className="text-[10px] font-semibold tracking-wider opacity-50 uppercase whitespace-nowrap">Paragraph Limit</label>
+                <label htmlFor="paragraph-limit" className="text-[10px] font-semibold tracking-wider opacity-70 uppercase whitespace-nowrap">Paragraph Limit</label>
                 <input id="paragraph-limit" type="number" min="0" value={paragraphLimit} onChange={(e) => setParagraphLimit(Number(e.target.value))} className={`${themeStyle.input} rounded-lg pl-2 pr-0 py-1 text-xs font-semibold text-right outline-none w-24 mr-1`} />
               </div>
             )}
@@ -483,14 +483,14 @@ export default function App() {
 {/* Toolbox Widgets - page limit */}
             {toolbox.pageLimit && (
               <div className={`flex items-center justify-between gap-4 ${themeStyle.widget} px-3 py-2 rounded-2xl shrink-0`}>
-                <label htmlFor="page-limit" className="text-[10px] font-semibold tracking-wider opacity-50 uppercase whitespace-nowrap">Page Limit</label>
+                <label htmlFor="page-limit" className="text-[10px] font-semibold tracking-wider opacity-70 uppercase whitespace-nowrap">Page Limit</label>
                 <input id="page-limit" type="number" min="0" value={pageLimit} onChange={(e) => setPageLimit(Number(e.target.value))} className={`${themeStyle.input} rounded-lg pl-2 pr-0 py-1 text-xs font-semibold text-right outline-none w-24 mr-1`} />
               </div>
             )}
 
             {toolbox.files && (
               <div role="group" aria-labelledby="files-heading" className="flex flex-col gap-2 mt-auto pt-3 border-t border-white/10 shrink-0">
-                <span id="files-heading" className="text-[10px] font-semibold tracking-wider opacity-50 uppercase">Files</span>
+                <span id="files-heading" className="text-[10px] font-semibold tracking-wider opacity-70 uppercase">Files</span>
                 <button type="button" onClick={handleSaveFile} className={`flex items-center gap-2.5 w-full ${themeStyle.widget} hover:opacity-80 transition p-2 rounded-xl text-xs cursor-pointer`}>
                   <FileText size={14} /> Save File
                 </button>

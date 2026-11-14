@@ -10,10 +10,11 @@ export default defineConfig({
   build: {
     rollupOptions: {
       output: {
-        manualChunks: {
-          react: ['react', 'react-dom'],
-          lucide: ['lucide-react'],
-          zustand: ['zustand'],
+        manualChunks(id: string) {
+          if (!id.includes('node_modules')) return;
+          if (/node_modules\/(react|react-dom|scheduler)\//.test(id)) return 'react';
+          if (id.includes('node_modules/lucide-react/')) return 'lucide';
+          if (id.includes('node_modules/zustand/')) return 'zustand';
         },
       },
     },
