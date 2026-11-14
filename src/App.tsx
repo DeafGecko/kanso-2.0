@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { useKansoStore, type KansoPreferences } from './store/useKansoStore';
 import { PanelRightOpen, PanelRightClose, Sun, Coffee, Moon, FileText, FolderOpen, Plus, Sliders } from 'lucide-react';
+import { playPenHoverSound } from './utils/penSound';
 import { TextToolsWidget } from './components/TextToolsWidget';
 import { MetricsModal } from './components/MetricsModal';
 import { FindReplaceModal } from './components/FindReplaceModal';
@@ -265,7 +266,24 @@ export default function App() {
       {!isFocusMode && (
         <header className="flex items-center justify-between mb-4 px-2 shrink-0 animate-fadeIn">
           <div className="flex min-w-0 flex-wrap items-center gap-3">
-            <h1 className="text-lg font-semibold tracking-widest font-serif opacity-90">KANSO</h1>
+            <svg
+              aria-hidden="true"
+              viewBox="0 0 24 24"
+              width="32"
+              height="32"
+              fill="currentColor"
+              onMouseEnter={playPenHoverSound}
+              className={`shrink-0 -mr-2 cursor-default opacity-90 ${currentTheme === 'light' ? 'text-black' : ''}`}
+            >
+              <g transform="rotate(45 12 12)">
+                <rect x="9.6" y="1.5" width="4.8" height="3.4" rx="0.9" />
+                <rect x="8.25" y="4.8" width="7.5" height="6.2" rx="0.7" />
+                <rect x="8.25" y="11.9" width="7.5" height="5.6" rx="0.7" />
+                <path d="M8.25 17.4 H15.75 L12 22.6 Z" />
+                <path d="M15.6 5.2 H17.2 V10.6 Q17.2 11.6 16.2 11.6 H15.6" fill="none" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round" />
+              </g>
+            </svg>
+            <h1 onMouseEnter={playPenHoverSound} className="cursor-default select-none text-lg font-semibold tracking-widest font-serif opacity-90">KANSO</h1>
 
             {isOverAnyLimit && (
               <button
