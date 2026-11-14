@@ -285,16 +285,15 @@ export default function App() {
           </div>
           
           <div className="flex items-center gap-2">
-            {!isPreferencesOpen && (
-              <button 
-                onClick={() => setIsPreferencesOpen(true)} 
-                aria-label="Open preferences"
-                title="Open preferences"
-                className="h-8 w-8 rounded-full bg-white/5 hover:bg-white/15 backdrop-blur-md border border-white/10 transition flex items-center justify-center shadow-sm cursor-pointer"
-              >
-                <PanelRightOpen size={14} />
-              </button>
-            )}
+            <button
+              onClick={() => setIsPreferencesOpen(!isPreferencesOpen)}
+              aria-label={isPreferencesOpen ? 'Close preferences' : 'Open preferences'}
+              aria-expanded={isPreferencesOpen}
+              title={isPreferencesOpen ? 'Close preferences' : 'Open preferences'}
+              className="h-8 w-8 rounded-full bg-white/5 hover:bg-white/15 backdrop-blur-md border border-white/10 transition flex items-center justify-center shadow-sm cursor-pointer"
+            >
+              {isPreferencesOpen ? <PanelRightClose size={14} /> : <PanelRightOpen size={14} />}
+            </button>
           </div>
         </header>
       )}
@@ -339,7 +338,6 @@ export default function App() {
                   <Sliders size={12} />
                 </button>
               </div>
-              <button onClick={() => setIsPreferencesOpen(false)} aria-label="Close preferences" title="Close preferences" className="flex h-8 w-8 items-center justify-center rounded-full opacity-60 hover:bg-white/10 hover:opacity-100 transition cursor-pointer"><PanelRightClose size={16} /></button>
             </div>
 
 {/* Toolbox Widgets */}
