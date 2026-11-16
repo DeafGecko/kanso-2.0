@@ -14,6 +14,7 @@ Kanso is a focused writing application built with React and TypeScript. It provi
 - Import and export for text and Markdown files
 - Focus Mode
 - Persistent documents and preferences
+- Header pen logo that plays a short click sound on hover
 
 The Toolbox provides access to editor settings, writing limits, text tools, and file actions. Individual Toolbox sections can be enabled or hidden.
 
@@ -91,6 +92,30 @@ npm run lint
 npm run build
 ```
 
+Run the unit tests (Vitest) and browser tests (Playwright, including axe accessibility checks):
+
+```bash
+npm test
+npm run test:e2e
+```
+
+Playwright starts its own dev server on port 5199. Stop anything else on that port before running it.
+
+Run Lighthouse against a local dev server on port 5173:
+
+```bash
+npm run dev
+npm run lighthouse
+```
+
+Lighthouse on the dev server is less accurate than on the live site. Use the deployed URL for performance numbers.
+
+### Documentation
+
+- [Case study](docs/case-study.md): the header toggle, pen logo, test setup, and deploy history.
+- [Known issues](docs/known-issues.md): open issues, what we know about each, and how to settle them.
+- [Unit and browser tests](docs/unit-tests.md): how the suite is organized, how to run and extend it, and troubleshooting.
+
 ## Technology
 
 - React 19
@@ -98,3 +123,5 @@ npm run build
 - Vite
 - Tailwind CSS
 - Zustand
+- Vitest and Testing Library (unit tests)
+- Playwright and axe (browser and accessibility tests)
