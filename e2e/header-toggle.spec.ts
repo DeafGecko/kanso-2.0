@@ -34,10 +34,15 @@ test.describe('header preferences toggle', () => {
     await page.goto('/');
     await expect(page.locator('textarea[aria-label="Document content"]')).toBeVisible();
 
+    // Wait for each sidebar transition (500ms) to finish before scanning, so axe
+    // never reads a half-animated frame.
+    const settle = () => page.evaluate(() => Promise.all(document.getAnimations().map((a) => a.finished)));
+
     await ensureClosed(page);
+    await settle();
     const closed = await new AxeBuilder({ page }).withTags(WCAG_TAGS).analyze();
     await ensureOpen(page);
-    await page.waitForTimeout(600); // sidebar transition is 500ms
+    await settle();
     const open = await new AxeBuilder({ page }).withTags(WCAG_TAGS).analyze();
 
     await testInfo.attach('axe-results', {
